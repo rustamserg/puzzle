@@ -107,14 +107,6 @@
 							sp.graphics.endFill();
 						}
 					}
-					else
-					{
-						/*x = j*Config.cellSize;
-						y = i*Config.cellSize;
-						
-						sp.graphics.beginFill(0x595959);
-						sp.graphics.drawRect(x, y, Config.cellSize, Config.cellSize);*/
-					}
 				}
 			}
 			return sp;

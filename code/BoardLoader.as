@@ -56,12 +56,12 @@
 			
 			if (Config.puzzleLevel == 2)
 			{
-				matrix = [1, 1, 7, 7, 8, 8,
-							1, 1, 7, 7, 8, 8,
-					  		2, 3, 3, 7, 4, 4,
-					  		2, 3, 3, 7, 6, 4,
-					  		2, 3, 5, 5, 6, 4,
-					  		2, 5, 5, 5, 6, 6];
+				matrix = [1, 1, 1, 1, 1, 1,
+							1, 1, 1, 1, 1, 1,
+					  		1, 1, 1, 1, 1, 1,
+					  		1, 1, 1, 1, 1, 2,
+					  		1, 1, 1, 1, 1, 2,
+					  		1, 1, 1, 1, 1, 2];
 			}
 			else if (Config.puzzleLevel == 1)
 			{
@@ -283,6 +283,14 @@
 				
 				for (var j:Number = 0; j < rotIdx; j++)
 					m_arrFig[i].rotateCWFigure();
+			}
+		}
+		
+		public function stopPuzzle():void
+		{
+			for (var i:Number = 0; i < m_arrFig.length; i++)
+			{
+				m_arrFig[i].stopFigure();
 			}
 		}
 	}
