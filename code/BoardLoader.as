@@ -18,77 +18,114 @@
 		
 		public function loadPuzzle():void
 		{
-			/*var requestGet:URLRequest = new URLRequest("http://plainx.com/andrey/gen.php");
-			var loaderGet:URLLoader = new URLLoader();
-			var variablesGet:URLVariables = new URLVariables();
-
-			variablesGet.board = Config.boardSize;
-			variablesGet.minc = Config.minCells;
-			variablesGet.maxc = Config.maxCells;
-
-			requestGet.data = variablesGet;
-			requestGet.method = URLRequestMethod.POST;
-
-			loaderGet.dataFormat = URLLoaderDataFormat.VARIABLES;
-			loaderGet.addEventListener(Event.COMPLETE, loaderGetCompleteHandler);
+			var matrix:Array = cleanBoard;
 			
-			loaderGet.load(requestGet);*/
-			createPuzzle(null);
+			// plant seeds
+			for (var sid = 1; sid <= Config.boardCells; sid++)
+			{
+				while (true)
+				{
+					var xs:Number = randRange(0, Config.boardSize - 1);
+					var ys:Number = randRange(0, Config.boardSize - 1);
+					if (matrix[xs + ys*Config.boardSize] == 0)
+					{
+						matrix[xs + ys*Config.boardSize] = sid;
+						break;
+					}
+				}
+			}
+			
+			// grow seeds
+			while (true)
+			{
+				// iterate over plant and try to join free slots
+				for (var xp = 0; xp < Config.boardSize; xp++)
+				{
+					for (var yp = 0; yp < Config.boardSize; yp++)
+					{
+						if (matrix[xp + yp*Config.boardSize] > 0)
+							continue;
+						
+						// pickup seeds around
+						var seeds:Array = new Array(4);
+						for (var dir_idx = 0; dir_idx < 4; dir_idx++)
+						{
+							seeds[dir_idx] = 0;
+							var seed_x = xp;
+							var seed_y = yp;
+
+							if (dir_idx == 0 && seed_y > 0) seed_y--; // up
+							if (dir_idx == 1 && seed_y < (Config.boardSize - 1)) seed_y++; // down
+							if (dir_idx == 2 && seed_x > 0) seed_x--; // left
+							if (dir_idx == 3 && seed_x < (Config.boardSize - 1)) seed_x++; // right
+						
+							var joint_seed_id = matrix[seed_x + seed_y*Config.boardSize];
+							if (joint_seed_id == 0)
+								continue;
+								
+							var seed_count:Number = 0;
+							for each (var sc in matrix)
+								if (sc == joint_seed_id) seed_count++;
+							seeds[dir_idx] = seed_count;
+						}
+						
+						// randomly select lowest seed count
+						var max_weight = seeds[0] + seeds[1] + seeds[2] + seeds[3];
+						var pick_weight:Number = randRange(0, max_weight);
+						for (var dir = 0; dir < 4; dir++)
+						{
+							if (seeds[dir] == 0)
+								continue;
+							
+							if (pick_weight <= (max_weight - seeds[dir]))
+							{
+								var seed_x = xp;
+								var seed_y = yp;
+
+								if (dir == 0) seed_y--; // up
+								if (dir == 1) seed_y++; // down
+								if (dir == 2) seed_x--; // left
+								if (dir == 3) seed_x++; // right
+								
+								matrix[xp + yp*Config.boardSize] = matrix[seed_x + seed_y*Config.boardSize];
+								break;
+							}
+						}
+					}
+				}
+	
+				// check if all matrix is filled fully
+				var filled:Boolean = true;
+				for each (var sd:Number in matrix)
+				{
+					if (sd == 0)
+					{
+						filled = false;
+						break;
+					}
+				}
+				if (filled) break;
+			}
+			createPuzzle(matrix);
+		}
+		
+		private function get cleanBoard():Array
+		{
+			var matrix:Array = new Array(Config.boardSize*Config.boardSize);
+			for (var x = 0; x < Config.boardSize; x++)
+				for (var y = 0; y < Config.boardSize; y++)
+					matrix[x + y*Config.boardSize] = 0;
+			return matrix;
+		}
+		
+		private function randRange(min:Number, max:Number):Number
+		{
+    		var randomNum:Number = Math.floor(Math.random() * (max - min + 1)) + min;
+    		return randomNum;
 		}
 	
-		private function loaderGetCompleteHandler(event:Event):void
-		{
-			/*var loader:URLLoader = URLLoader(event.target);
-    		var vars:URLVariables = new URLVariables(loader.data);
-			if (vars.board != "")
-			{
-				var str:String = vars.board;
-				var matrix:Array = str.split(",", Config.boardSize*Config.boardSize);
-				createPuzzle(matrix);
-			}*/
-		}
-
 		private function createPuzzle(matrix:Array):void
 		{
-			// here we fill test board matrix ///////////////
-			// in future it should be replaced by 
-			var matrix:Array = new Array();
-			
-			if (Config.puzzleLevel == 2)
-			{
-				matrix = [1, 1, 1, 1, 1, 1,
-							1, 1, 1, 1, 1, 1,
-					  		1, 1, 1, 1, 1, 1,
-					  		1, 1, 1, 1, 1, 2,
-					  		1, 1, 1, 1, 1, 2,
-					  		1, 1, 1, 1, 1, 2];
-			}
-			else if (Config.puzzleLevel == 1)
-			{
-				matrix = [1, 1, 7, 7, 8, 8, 8, 8,
-							1, 1, 7, 7, 8, 8, 8, 8,
-					  		2, 3, 3, 7, 4, 4, 4, 4,
-					  		2, 3, 3, 7, 6, 4, 4, 4,
-					  		2, 3, 5, 5, 6, 4, 4, 4,
-							2, 3, 5, 5, 6, 4, 4, 4,
-							2, 3, 5, 5, 6, 4, 4, 4,
-					  		2, 5, 5, 5, 6, 6, 6, 6];
-			}
-			else
-			{
-				matrix = [1, 1, 7, 7, 8, 8, 8, 8, 8, 8,
-							1, 1, 7, 7, 8, 8, 8, 8, 8, 8,
-							1, 1, 7, 7, 8, 8, 8, 8, 8, 8,
-							1, 1, 7, 7, 8, 8, 8, 8, 8, 8,
-					  		2, 3, 3, 7, 4, 4, 4, 4, 4, 4,
-					  		2, 3, 3, 7, 6, 4, 4, 4, 4, 4,
-					  		2, 3, 5, 5, 6, 4, 4, 4, 4, 4,
-							2, 3, 5, 5, 6, 4, 4, 4, 4, 4,
-							2, 3, 5, 5, 6, 4, 4, 4, 4, 4,
-					  		2, 5, 5, 5, 6, 6, 6, 6, 6, 6];
-			}
-			////////////////////////////////////////////////
-
 			// clear current stage
 			if (m_board && contains(m_board)) removeChild(m_board);
 			
